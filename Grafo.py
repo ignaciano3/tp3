@@ -32,6 +32,7 @@ class Grafo:
         padres[origen] = -1
         cola = Cola()
         cola.encolar(origen)
+        
         while not cola.esta_vacia():
             s = cola.desencolar()
             if (s == destino): break
@@ -53,28 +54,25 @@ class Grafo:
             p = pila.desapilar()
             print(f">>> {p}", end=" ")
 
-def todos_en_rango(self, origen, k):
-    visitados = set()
-    padres = dict()
-    padres[origen] = -1
-    cola = Cola()
-    orden = dict()
-    orden[origen] = 0
-    cola.encolar(origen)
+    def todos_en_rango(self, origen, k):
+        visitados = set()
+        cola = Cola()
+        orden = dict()
+        orden[origen] = 0
+        cola.encolar(origen)
 
-    en_rango= 0
-    while not cola.esta_vacia():
-        s = cola.desencolar()
-        for i in self.adyacentes(s):
-            if i not in visitados:
-                cola.encolar(i)
-                visitados.add(i)
-                padres[i] = s
-                orden[i] = orden[s] + 1
-                if (orden[i] == k): en_rango += 1
-                if (orden[i] > k): break
+        en_rango= 0
+        while not cola.esta_vacia():
+            s = cola.desencolar()
+            for i in self.adyacentes(s):
+                if i not in visitados:
+                    cola.encolar(i)
+                    visitados.add(i)
+                    orden[i] = orden[s] + 1
+                    if (orden[i] == k): en_rango += 1
+                    if (orden[i] > k): break
 
-    return en_rango
+        return en_rango
 
 
 class Grafo_con_datos(Grafo):

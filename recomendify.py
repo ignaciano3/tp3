@@ -56,9 +56,9 @@ def main():
     lista_canciones = (data.TRACK_NAME + " - " + data.ARTIST).unique()
     lista_playlists = data.PLAYLIST_NAME.unique()
 
-    #usuarios_canciones = crear_usuarios_canciones(lista_usuarios, lista_canciones, data)
-    canciones_grafo = crear_canciones_por_playlist(lista_canciones, lista_playlists, data)
-    print(canciones_grafo.adyacentes[0])
+    usuarios_canciones = crear_usuarios_canciones(lista_usuarios, lista_canciones, data)
+    #canciones_grafo = crear_canciones_por_playlist(lista_canciones, lista_playlists, data)
+    print(usuarios_canciones.todos_en_rango(100, 8))
      
     
     
