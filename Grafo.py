@@ -44,7 +44,6 @@ class Grafo:
         while True:
             s = cola.desencolar()
             if (s == destino):
-                print(self.info(s))
                 break
 
             for i in self.adyacentes(s):
@@ -55,7 +54,7 @@ class Grafo:
 
             if(cola.esta_vacia()):
                 print("No se encontro recorrido")
-                break
+                return
         
         camino = list()
         while (s != None):
