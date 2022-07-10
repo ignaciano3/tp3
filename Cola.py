@@ -7,6 +7,7 @@ class Cola:
         return len(self.cola) == 0
         
     def encolar(self, item):
+        if (item in self.cola): print("repetciones")
         self.cola.append(item)
 
     def ver_primero(self):
