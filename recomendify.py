@@ -81,7 +81,6 @@ def main():
             except Exception as error:
                 print("Tanto el origen como el destino deben ser canciones")
                 continue
-            # este funciona mal
             canciones_grafo.camino_mas_corto_bfs(cancion_1, cancion_2)
             continue
 
