@@ -1,5 +1,8 @@
+#!/usr/bin/python3
+
 import pandas as pd
-from Grafo import Grafo
+from grafo import Grafo
+from biblioteca import camino_mas_corto_bfs, todos_en_rango, ciclo_n
 
 def crear_usuarios_canciones(usuarios, canciones, data):
     '''
@@ -52,19 +55,19 @@ def camino_mas_corto(req, usuario_canciones_grafo, canciones_por_index):
     except:
         print("Tanto el origen como el destino deben ser canciones")
         return
-    usuario_canciones_grafo.camino_mas_corto_bfs(cancion_1+169, cancion_2+169)
+    camino_mas_corto_bfs(usuario_canciones_grafo, cancion_1+169, cancion_2+169)
 
 
 def ciclo_n_canciones(req, canciones_grafo, canciones_por_index):
     n = int(req[0])
     cancion = canciones_por_index[" ".join(req[1:])]
-    canciones_grafo.ciclo_n_canciones(cancion, n)
+    ciclo_n(canciones_grafo, cancion, n)
 
 
 def rango_n_canciones(req, canciones_grafo, canciones_por_index):
     n = int(req[0])
     cancion = canciones_por_index[" ".join(req[1:])]
-    canciones_grafo.todos_en_rango(cancion, n)
+    todos_en_rango(canciones_grafo, cancion, n)
 
 
 def mas_importantes(n):
@@ -114,8 +117,6 @@ def main():
         elif (req[0] == "rango"):
             rango_n_canciones(req[1:], canciones_grafo, canciones_por_index)
             
-    
-    
-    
+            
 
 main()
