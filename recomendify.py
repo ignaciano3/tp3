@@ -104,18 +104,13 @@ def main():
                 recomendacion_usuarios(req[2])
         
         
-        if (req[0] == "mas_importantes"):
+        elif (req[0] == "mas_importantes"):
             mas_importantes(req[1:])
-            continue
-        
-        
 
         elif (req[0] == "ciclo"):
             ciclo_n_canciones(req[1:], canciones_grafo, canciones_por_index)
-            
-            continue
 
-        if (req[0] == "rango"):
+        elif (req[0] == "rango"):
             rango_n_canciones(req[1:], canciones_grafo, canciones_por_index)
             
     
