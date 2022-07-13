@@ -20,7 +20,7 @@ def crear_usuarios_canciones(usuarios, canciones, data):
 def crear_canciones_por_playlist(canciones, playlists, data):
     '''
     Tener un grafo no dirigido relacionando canciones si aparecen en una misma playlist (al menos una playlist lista a ambas canciones).
-    O (P + C²)
+    O (P + C)
     '''
     cancion_vs_playlist = list()
     
@@ -42,6 +42,30 @@ def crear_canciones_por_playlist(canciones, playlists, data):
     return canciones_por_playlist
 
 
+def camino_mas_corto(req, canciones_grafo, canciones_por_index):
+    canciones = " ".join(req)
+    canciones = canciones.split(" >>>> ")
+    try:
+        cancion_1 = canciones_por_index[canciones[0]]
+        cancion_2 = canciones_por_index[canciones[1]]
+    except:
+        print("Tanto el origen como el destino deben ser canciones")
+        return
+    canciones_grafo.camino_mas_corto_bfs(cancion_1, cancion_2)
+
+
+def ciclo_n_canciones(req, canciones_grafo, canciones_por_index):
+    n = int(req[0])
+    cancion = canciones_por_index[" ".join(req[1:])]
+    canciones_grafo.ciclo_n_canciones(cancion, n)
+
+
+def rango_n_canciones(req, canciones_grafo, canciones_por_index):
+    n = int(req[0])
+    cancion = canciones_por_index[" ".join(req[1:])]
+    canciones_grafo.todos_en_rango(cancion, n)
+
+
 def mas_importantes(n):
     pass
 
@@ -49,9 +73,6 @@ def recomendacion_canciones(n):
     pass
 
 def recomendacion_usuarios(n):
-    pass
-
-def ciclo(n):
     pass
 
 
@@ -67,45 +88,36 @@ def main():
     #usuarios_canciones = crear_usuarios_canciones(lista_usuarios, lista_canciones, data)
     canciones_grafo = crear_canciones_por_playlist(lista_canciones, lista_playlists, data)
     
-    while(True):
+    while True:
         req = input().split()
         
-        if (not req): break
+        if not req: break
 
         if (req[0] == "camino"):
-            canciones = " ".join(req[1:])
-            canciones = canciones.split(" >>>> ")
-            try:
-                cancion_1 = canciones_por_index[canciones[0]]
-                cancion_2 = canciones_por_index[canciones[1]]
-            except Exception as error:
-                print("Tanto el origen como el destino deben ser canciones")
-                continue
-            canciones_grafo.camino_mas_corto_bfs(cancion_1, cancion_2)
-            continue
+            #tengo que arreglar este
+            camino_mas_corto(req[1:], canciones_grafo, canciones_por_index)
 
-        if (req[0] == "recomendacion"):
+        elif (req[0] == "recomendacion"):
             if (req[1] == "canciones"):
                 recomendacion_canciones(req[2])
             if (req[1] == "usuarios"):
                 recomendacion_usuarios(req[2])
-            continue
         
-        n = int(req[1])
-
+        
         if (req[0] == "mas_importantes"):
-            mas_importantes(n)
+            mas_importantes(req[1:])
             continue
         
-        cancion = canciones_por_index[" ".join(req[2:])]
+        
 
-        if (req[0] == "ciclo"):
-            # este esta fallando
-            canciones_grafo.ciclo_n_canciones(cancion, n)
+        elif (req[0] == "ciclo"):
+            ciclo_n_canciones(req[1:], canciones_grafo, canciones_por_index)
+            
             continue
 
         if (req[0] == "rango"):
-            canciones_grafo.todos_en_rango(cancion, n)
+            rango_n_canciones(req[1:], canciones_grafo, canciones_por_index)
+            
     
     
     

@@ -2,9 +2,9 @@
 
 ## Ya esta:
 - Todos en rango
-- Camino minimo (hay que hacer q diga la playlist y esas boludeces)
+- Ciclo n
 
 ## Falta:
-- Ciclo n canciones (no se porque me esta dando cualquier cosa, es problema de python)
+- mas importantes
 - Pagerank
-- Interfaz
+- camino mas corto

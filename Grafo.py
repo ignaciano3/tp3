@@ -68,10 +68,7 @@ class Grafo:
         
         print(x)
 
-        
-
-
-
+    
     def todos_en_rango(self, origen, k):
         visitados = set()
         cola = Cola()
@@ -93,34 +90,39 @@ class Grafo:
 
         print(en_rango)
         return
+    
+    def reconstruir_ciclo(self, v, destino, padres):
+        print(self.info(destino), end = " --> ")
+        while v is not destino:
+            print(self.info(v), end = " --> ")
+            v = padres[v]
+        print(self.info(destino))
+
+        return
+
+
+    def ciclo_dfs(self, v, destino, n, visitados, padres):
+        if n < 0: return False
+
+        if n == 0 and destino in self.adyacentes(v): 
+            self.reconstruir_ciclo(v, destino, padres)
+            return True
+
+        visitados.add(v)
+        for w in self.adyacentes(v):
+            if w not in visitados and w is not destino:
+                padres[w] = v
+                ciclo = self.ciclo_dfs(w, destino, n-1, visitados, padres)
+                if ciclo: return True
+        
+        return False
 
 
     def ciclo_n_canciones(self, origen, n):
-        visitados = set()
-        padres = dict()
-        padres[origen] = None
-        orden = dict()
-        orden[origen] = 0
-        cola = Cola()
-        cola.encolar(origen)
-        visitados.add(origen)
-        
-        while not cola.esta_vacia():
-            s = cola.desencolar()
-            if (orden[s] > n): return None
-            if (orden[s] == n-2 and s in self.adyacentes(origen)): break
-            
-            for i in self.adyacentes(s):
-                if i not in visitados:
-                    cola.encolar(i)
-                    visitados.add(i)
-                    padres[i] = s
-                    orden[i] = orden[s] + 1
-                    
-        
-        print("0", self.info(origen))
-        i = 1
-        while (s != None):
-            print(i, self.info(s))
-            s = padres[s]
-            i += 1
+
+        for w in self.adyacentes(origen):
+            visitados = set()
+            padres = dict()
+            padres[w] = origen
+            if self.ciclo_dfs(w, origen, n-2, visitados, padres): return
+        print("No se encontro recorrido")
