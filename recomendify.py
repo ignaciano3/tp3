@@ -11,9 +11,10 @@ def crear_usuarios_canciones(usuarios, canciones, data):
     for usuario in range(len(usuarios)):
         tabla_usuario = data[data.USER_ID == usuarios_canciones.info(usuario)]
         for _, cancion in tabla_usuario.iterrows():
+            playlist_name = cancion.PLAYLIST_NAME
             cancion = cancion.TRACK_NAME + " - " + cancion.ARTIST
             cancion = list(canciones).index(cancion)
-            usuarios_canciones.add_edge(usuario, cancion + len(usuarios))
+            usuarios_canciones.add_edge(usuario, cancion + len(usuarios), playlist_name)
     
     return usuarios_canciones
 
@@ -42,7 +43,7 @@ def crear_canciones_por_playlist(canciones, playlists, data):
     return canciones_por_playlist
 
 
-def camino_mas_corto(req, canciones_grafo, canciones_por_index):
+def camino_mas_corto(req, usuario_canciones_grafo, canciones_por_index):
     canciones = " ".join(req)
     canciones = canciones.split(" >>>> ")
     try:
@@ -51,7 +52,7 @@ def camino_mas_corto(req, canciones_grafo, canciones_por_index):
     except:
         print("Tanto el origen como el destino deben ser canciones")
         return
-    canciones_grafo.camino_mas_corto_bfs(cancion_1, cancion_2)
+    usuario_canciones_grafo.camino_mas_corto_bfs(cancion_1+169, cancion_2+169)
 
 
 def ciclo_n_canciones(req, canciones_grafo, canciones_por_index):
@@ -85,7 +86,7 @@ def main():
     lista_playlists = data.PLAYLIST_NAME.unique()
     canciones_por_index = dict(zip(lista_canciones, range(len(lista_canciones))))
 
-    #usuarios_canciones = crear_usuarios_canciones(lista_usuarios, lista_canciones, data)
+    usuarios_canciones = crear_usuarios_canciones(lista_usuarios, lista_canciones, data)
     canciones_grafo = crear_canciones_por_playlist(lista_canciones, lista_playlists, data)
     
     while True:
@@ -95,7 +96,7 @@ def main():
 
         if (req[0] == "camino"):
             #tengo que arreglar este
-            camino_mas_corto(req[1:], canciones_grafo, canciones_por_index)
+            camino_mas_corto(req[1:], usuarios_canciones, canciones_por_index)
 
         elif (req[0] == "recomendacion"):
             if (req[1] == "canciones"):

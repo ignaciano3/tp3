@@ -30,8 +30,6 @@ class Grafo:
             ady.append(i)
         return ady
 
-    def printear(camino):
-        pass
 
     def camino_mas_corto_bfs(self, origen, destino):
         visitados = set()
@@ -58,15 +56,25 @@ class Grafo:
         
         camino = list()
         while (s != None):
-            camino.append(self.info(s))
+            camino.append(s)
             s = padres[s]
         camino.reverse()
         
-        for x in camino:
-            if (x == self.info(destino)): break
-            print(x, end= " >>>> ")
+        for i in range(0, len(camino), 2):
+            # que horrible es la manera de representar el camino mas corto por dios
+            # claro ejemplo no aclares que oscurece
+            if (camino[i] == destino): break
+            print(self.info(camino[i]), end= " --> ")
+            print("aparece en playlist --> ", end ="")
+            print(self.peso(camino[i], camino[i+1]), end = " --> ")
+            print("de --> ", end="")
+            print(self.info(camino[i+1]), end = " --> ")
+            print("tiene una playlist", end =" --> ")
+            print(self.peso(camino[i+1], camino[i+2]), end =" --> ")
+            print("donde aparece --> ", end="") #que horrible todos estos: aparece... de... donde aparece... deberian sacarlos
+            
         
-        print(x)
+        print(self.info(camino[i]))
 
     
     def todos_en_rango(self, origen, k):
@@ -91,6 +99,7 @@ class Grafo:
         print(en_rango)
         return
     
+
     def reconstruir_ciclo(self, v, destino, padres):
         print(self.info(destino), end = " --> ")
         while v is not destino:
