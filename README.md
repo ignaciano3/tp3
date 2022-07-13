@@ -6,5 +6,5 @@
 
 ## Falta:
 - mas importantes
-- Pagerank
+- recomendacion
 - camino mas corto
