@@ -64,8 +64,8 @@ def todos_en_rango(grafo, origen, k):
                 cola.encolar(i)
                 visitados.add(i)
                 orden[i] = orden[s] + 1
-                if (orden[i] == k): en_rango += 1
-                if (orden[i] > k): break
+                if orden[i] == k: en_rango += 1
+                if orden[i] > k: break
 
     print(en_rango)
     return

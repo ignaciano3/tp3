@@ -11,13 +11,16 @@ def crear_usuarios_canciones(usuarios, canciones, data):
     O(U + C)
     '''
     usuarios_canciones = Grafo(len(usuarios) + len(canciones), list(usuarios) + list(canciones))
-    for usuario in range(len(usuarios)):
-        tabla_usuario = data[data.USER_ID == usuarios_canciones.info(usuario)]
-        for _, cancion in tabla_usuario.iterrows():
-            playlist_name = cancion.PLAYLIST_NAME
-            cancion = cancion.TRACK_NAME + " - " + cancion.ARTIST
-            cancion = list(canciones).index(cancion)
-            usuarios_canciones.add_edge(usuario, cancion + len(usuarios), playlist_name)
+    canciones_por_index = dict(zip(canciones, range(len(canciones))))
+    usuarios_por_index = dict(zip(usuarios, range(len(usuarios))))
+    
+    for _, linea in data.iterrows():
+        playlist_name = linea.PLAYLIST_NAME
+        cancion = linea.TRACK_NAME + " - " + linea.ARTIST
+        cancion = canciones_por_index[cancion]
+        usuario = linea.USER_ID
+        usuario = usuarios_por_index[usuario]
+        usuarios_canciones.add_edge(usuario, cancion + len(usuarios), playlist_name)
     
     return usuarios_canciones
 
@@ -38,7 +41,7 @@ def crear_canciones_por_playlist(canciones, playlists, data):
     canciones_por_index = dict(zip(canciones, range(len(canciones)))) # muy clave este
     
     for p in cancion_vs_playlist:
-        while(len(p) > 0):
+        while len(p) > 0:
             cancion_1 = p.pop()
             for cancion_2 in p:
                 canciones_por_playlist.add_edge(canciones_por_index[cancion_1], canciones_por_index[cancion_2])
