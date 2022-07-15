@@ -3,6 +3,7 @@
 import pandas as pd
 from grafo import Grafo
 from biblioteca import camino_mas_corto_bfs, pagerank, todos_en_rango, ciclo_n
+import numpy as np
 
 def crear_usuarios_canciones(usuarios, canciones, data):
     '''
@@ -115,9 +116,15 @@ def main():
     canciones_por_index = dict(zip(lista_canciones, range(len(lista_canciones))))
 
     #usuarios_canciones = crear_usuarios_canciones(lista_usuarios, lista_canciones, data)
-    #canciones_grafo = crear_canciones_por_playlist(lista_canciones, lista_playlists, data)
-    recomendaciones_grafo = crear_recomendaciones_grafo(data)
-    pagerank(recomendaciones_grafo)
+    canciones_grafo = crear_canciones_por_playlist(lista_canciones, lista_playlists, data)
+    pagerank_dict = pagerank(canciones_grafo)
+    print(max(pagerank_dict))
+    x = np.where(pagerank_dict == max(pagerank_dict))
+    print(x[0])
+    print(canciones_grafo.info(x[0][0]))
+    print(canciones_grafo.info(x[0][1]))
+    print(canciones_grafo.info(x[0][2]))
+
     return
     while True:
         req = input().split()

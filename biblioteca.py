@@ -1,8 +1,12 @@
 import random
 from Cola import Cola
+import numpy as np
+from operator import truediv
+
+from grafo import Grafo
 
 # Camino mas corto
-def camino_mas_corto_bfs(grafo, origen, destino):
+def camino_mas_corto_bfs(grafo : Grafo, origen, destino):
     visitados = set()
     visitados.add(origen)
     padres = dict()
@@ -49,7 +53,7 @@ def camino_mas_corto_bfs(grafo, origen, destino):
 
 
 # Todos en rango
-def todos_en_rango(grafo, origen, k):
+def todos_en_rango(grafo : Grafo, origen, k):
     visitados = set()
     cola = Cola()
     orden = dict()
@@ -73,7 +77,7 @@ def todos_en_rango(grafo, origen, k):
 
 
 #Ciclo n por dfs
-def reconstruir_ciclo(grafo, v, destino, padres):
+def reconstruir_ciclo(grafo : Grafo, v, destino, padres):
     print(grafo.info(destino), end = " --> ")
     while v is not destino:
         print(grafo.info(v), end = " --> ")
@@ -82,7 +86,7 @@ def reconstruir_ciclo(grafo, v, destino, padres):
 
     return
 
-def ciclo_dfs(grafo, v, destino, n, visitados, padres):
+def ciclo_dfs(grafo : Grafo, v, destino, n, visitados, padres):
     if n < 0: return False
 
     if n == 0 and destino in grafo.adyacentes(v): 
@@ -98,7 +102,7 @@ def ciclo_dfs(grafo, v, destino, n, visitados, padres):
     
     return False
 
-def ciclo_n(grafo, origen, n):
+def ciclo_n(grafo : Grafo, origen, n):
 
     for w in grafo.adyacentes(origen):
         visitados = set()
@@ -107,20 +111,21 @@ def ciclo_n(grafo, origen, n):
         if ciclo_dfs(grafo, w, origen, n-2, visitados, padres): return
     print("No se encontro recorrido")
 
-def pagerank_iterar(grafo):
-    d = 0.85
-    error = (1/grafo.V)**3
-    print(grafo.V)
+def matriz_adyacencia(grafo):
+    M = np.zeros((grafo.V, grafo.V))
     for v in range(grafo.V):
-        pagerank_sum = sum( (grafo.info(w) / len(grafo.adyacentes(w))) for w in grafo.adyacentes(v))
-        new_pagerank = (1 - d)/grafo.V + d * pagerank_sum
-        old_pagerank = grafo.data[v]
-        grafo.data[v] = new_pagerank
-        if abs(new_pagerank - old_pagerank) < error: return False
-    return True
+        for w in grafo.adyacentes(v):
+            M[w][v] = 1/len(grafo.adyacentes(v))
+    return M
 
-def pagerank(grafo):
-    random.seed(0)
-    while True:
-        if (not pagerank_iterar(grafo)): break
-        #no hace mas de una iteracion ummm...
+def pagerank(grafo : Grafo, num_iterations: int = 30, d: float = 0.85):
+    # Deberia funcionar bien pero creo q el de grafo canciones esta mal
+    # me tira tambien otros numeros para el todos en rango
+    N = grafo.V
+    v = np.ones(N) / N
+    M = matriz_adyacencia(grafo)
+
+    M_hat = (d * M + (1 - d) / N)
+    for _ in range(num_iterations):
+        v = v @ M_hat
+    return v
