@@ -30,46 +30,19 @@ def crear_canciones_por_playlist(canciones, playlists, data):
     Tener un grafo no dirigido relacionando canciones si aparecen en una misma playlist (al menos una playlist lista a ambas canciones).
     O (P + C)
     '''
-    cancion_vs_playlist = list()
-    
-    for i in playlists:
-        tabla_playlist = data[data.PLAYLIST_NAME == i]
-        tabla_playlist = tabla_playlist.TRACK_NAME + " - " + tabla_playlist.ARTIST
-        cancion_vs_playlist.append(set(tabla_playlist))
-
-    canciones = list(canciones)
     canciones_por_playlist = Grafo(len(canciones), canciones)
     canciones_por_index = dict(zip(canciones, range(len(canciones)))) # muy clave este
-    
-    for p in cancion_vs_playlist:
-        while len(p) > 0:
-            cancion_1 = p.pop()
-            for cancion_2 in p:
-                canciones_por_playlist.add_edge(canciones_por_index[cancion_1], canciones_por_index[cancion_2])
-    
-    return canciones_por_playlist
 
-def crear_recomendaciones_grafo(data):
-    canciones = (data.TRACK_NAME + " - " + data.ARTIST).unique()
-    playlists = data.PLAYLIST_NAME.unique()
-    canciones_por_index = dict(zip(canciones, range(len(canciones))))
-
-    recomendaciones_grafo = Grafo(len(canciones), [1/len(canciones)] * len(canciones))
-
-    cancion_vs_playlist = list()
-    
     for i in playlists:
         tabla_playlist = data[data.PLAYLIST_NAME == i]
         tabla_playlist = tabla_playlist.TRACK_NAME + " - " + tabla_playlist.ARTIST
-        cancion_vs_playlist.append(set(tabla_playlist))
-    
-    for p in cancion_vs_playlist:
-        while len(p) > 0:
-            cancion_1 = p.pop()
-            for cancion_2 in p:
-                recomendaciones_grafo.add_edge(canciones_por_index[cancion_1], canciones_por_index[cancion_2])
+        tabla_playlist = set(tabla_playlist)
+        while len(tabla_playlist) > 0:
+            cancion_1 = tabla_playlist.pop()
+            for cancion_2 in tabla_playlist:
+                canciones_por_playlist.add_edge(canciones_por_index[cancion_1], canciones_por_index[cancion_2])
 
-    return recomendaciones_grafo
+    return canciones_por_playlist
 
 
 def camino_mas_corto(req, usuario_canciones_grafo, canciones_por_index):
@@ -115,40 +88,37 @@ def main():
     lista_playlists = data.PLAYLIST_NAME.unique()
     canciones_por_index = dict(zip(lista_canciones, range(len(lista_canciones))))
 
-    #usuarios_canciones = crear_usuarios_canciones(lista_usuarios, lista_canciones, data)
+    usuarios_canciones = crear_usuarios_canciones(lista_usuarios, lista_canciones, data)
     canciones_grafo = crear_canciones_por_playlist(lista_canciones, lista_playlists, data)
-    pagerank_dict = pagerank(canciones_grafo)
-    print(max(pagerank_dict))
+    
+    pagerank_dict = pagerank(usuarios_canciones)
     x = np.where(pagerank_dict == max(pagerank_dict))
-    print(x[0])
-    print(canciones_grafo.info(x[0][0]))
-    print(canciones_grafo.info(x[0][1]))
-    print(canciones_grafo.info(x[0][2]))
-
-    return
+    print(x)
+    print(usuarios_canciones.info(x[0][0]))
+    
     while True:
         req = input().split()
         
         if not req: break
 
-        if (req[0] == "camino"):
+        if req[0] == "camino":
             #tengo que arreglar este
             camino_mas_corto(req[1:], usuarios_canciones, canciones_por_index)
 
-        elif (req[0] == "recomendacion"):
-            if (req[1] == "canciones"):
+        elif req[0] == "recomendacion":
+            if req[1] == "canciones":
                 recomendacion_canciones(req[2])
-            if (req[1] == "usuarios"):
+            if req[1] == "usuarios":
                 recomendacion_usuarios(req[2])
         
         
-        elif (req[0] == "mas_importantes"):
+        elif req[0] == "mas_importantes":
             mas_importantes(req[1:])
 
-        elif (req[0] == "ciclo"):
+        elif req[0] == "ciclo":
             ciclo_n_canciones(req[1:], canciones_grafo, canciones_por_index)
 
-        elif (req[0] == "rango"):
+        elif req[0] == "rango":
             rango_n_canciones(req[1:], canciones_grafo, canciones_por_index)
             
             

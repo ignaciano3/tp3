@@ -118,7 +118,7 @@ def matriz_adyacencia(grafo):
             M[w][v] = 1/len(grafo.adyacentes(v))
     return M
 
-def pagerank(grafo : Grafo, num_iterations: int = 30, d: float = 0.85):
+def pagerank(grafo : Grafo, num_iterations: int = 100, d: float = 0.85):
     # Deberia funcionar bien pero creo q el de grafo canciones esta mal
     # me tira tambien otros numeros para el todos en rango
     N = grafo.V
