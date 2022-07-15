@@ -24,4 +24,4 @@ class Grafo:
         return self.data[v]
 
     def adyacentes(self, v):
-        return self.graph[v].keys()
+        return list(self.graph[v].keys())

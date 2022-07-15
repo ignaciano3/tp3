@@ -1,3 +1,4 @@
+import random
 from Cola import Cola
 
 # Camino mas corto
@@ -105,3 +106,21 @@ def ciclo_n(grafo, origen, n):
         padres[w] = origen
         if ciclo_dfs(grafo, w, origen, n-2, visitados, padres): return
     print("No se encontro recorrido")
+
+def pagerank_iterar(grafo):
+    d = 0.85
+    error = (1/grafo.V)**3
+    print(grafo.V)
+    for v in range(grafo.V):
+        pagerank_sum = sum( (grafo.info(w) / len(grafo.adyacentes(w))) for w in grafo.adyacentes(v))
+        new_pagerank = (1 - d)/grafo.V + d * pagerank_sum
+        old_pagerank = grafo.data[v]
+        grafo.data[v] = new_pagerank
+        if abs(new_pagerank - old_pagerank) < error: return False
+    return True
+
+def pagerank(grafo):
+    random.seed(0)
+    while True:
+        if (not pagerank_iterar(grafo)): break
+        #no hace mas de una iteracion ummm...

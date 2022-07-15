@@ -2,7 +2,7 @@
 
 import pandas as pd
 from grafo import Grafo
-from biblioteca import camino_mas_corto_bfs, todos_en_rango, ciclo_n
+from biblioteca import camino_mas_corto_bfs, pagerank, todos_en_rango, ciclo_n
 
 def crear_usuarios_canciones(usuarios, canciones, data):
     '''
@@ -48,6 +48,28 @@ def crear_canciones_por_playlist(canciones, playlists, data):
     
     return canciones_por_playlist
 
+def crear_recomendaciones_grafo(data):
+    canciones = (data.TRACK_NAME + " - " + data.ARTIST).unique()
+    playlists = data.PLAYLIST_NAME.unique()
+    canciones_por_index = dict(zip(canciones, range(len(canciones))))
+
+    recomendaciones_grafo = Grafo(len(canciones), [1/len(canciones)] * len(canciones))
+
+    cancion_vs_playlist = list()
+    
+    for i in playlists:
+        tabla_playlist = data[data.PLAYLIST_NAME == i]
+        tabla_playlist = tabla_playlist.TRACK_NAME + " - " + tabla_playlist.ARTIST
+        cancion_vs_playlist.append(set(tabla_playlist))
+    
+    for p in cancion_vs_playlist:
+        while len(p) > 0:
+            cancion_1 = p.pop()
+            for cancion_2 in p:
+                recomendaciones_grafo.add_edge(canciones_por_index[cancion_1], canciones_por_index[cancion_2])
+
+    return recomendaciones_grafo
+
 
 def camino_mas_corto(req, usuario_canciones_grafo, canciones_por_index):
     canciones = " ".join(req)
@@ -92,9 +114,11 @@ def main():
     lista_playlists = data.PLAYLIST_NAME.unique()
     canciones_por_index = dict(zip(lista_canciones, range(len(lista_canciones))))
 
-    usuarios_canciones = crear_usuarios_canciones(lista_usuarios, lista_canciones, data)
-    canciones_grafo = crear_canciones_por_playlist(lista_canciones, lista_playlists, data)
-    
+    #usuarios_canciones = crear_usuarios_canciones(lista_usuarios, lista_canciones, data)
+    #canciones_grafo = crear_canciones_por_playlist(lista_canciones, lista_playlists, data)
+    recomendaciones_grafo = crear_recomendaciones_grafo(data)
+    pagerank(recomendaciones_grafo)
+    return
     while True:
         req = input().split()
         
