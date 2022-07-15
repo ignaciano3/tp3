@@ -1,9 +1,7 @@
-import random
 from Cola import Cola
 import numpy as np
-from operator import truediv
-
 from grafo import Grafo
+from sknetwork.ranking import PageRank
 
 # Camino mas corto
 def camino_mas_corto_bfs(grafo : Grafo, origen, destino):
@@ -38,7 +36,7 @@ def camino_mas_corto_bfs(grafo : Grafo, origen, destino):
     for i in range(0, len(camino), 2):
         # que horrible es la manera de representar el camino mas corto por dios
         # claro ejemplo no aclares que oscurece
-        if (camino[i] == destino): break
+        if camino[i] == destino: break
         print(grafo.info(camino[i]), end= " --> ")
         print("aparece en playlist --> ", end ="")
         print(grafo.peso(camino[i], camino[i+1]), end = " --> ")
@@ -73,7 +71,6 @@ def todos_en_rango(grafo : Grafo, origen, k):
                 if orden[i] > k: break
 
     print(en_rango)
-    return
 
 
 #Ciclo n por dfs
@@ -83,8 +80,6 @@ def reconstruir_ciclo(grafo : Grafo, v, destino, padres):
         print(grafo.info(v), end = " --> ")
         v = padres[v]
     print(grafo.info(destino))
-
-    return
 
 def ciclo_dfs(grafo : Grafo, v, destino, n, visitados, padres):
     if n < 0: return False
@@ -116,16 +111,19 @@ def matriz_adyacencia(grafo):
     for v in range(grafo.V):
         for w in grafo.adyacentes(v):
             M[w][v] = 1/len(grafo.adyacentes(v))
+
     return M
 
-def pagerank(grafo : Grafo, num_iterations: int = 100, d: float = 0.85):
-    # Deberia funcionar bien pero creo q el de grafo canciones esta mal
-    # me tira tambien otros numeros para el todos en rango
-    N = grafo.V
-    v = np.ones(N) / N
+def pagerank(grafo : Grafo): 
+    #esto tiene que estar bien por que es de scipy
+    # o la matriz de adyacencia esta mal o el grafo esta mal
     M = matriz_adyacencia(grafo)
+    pagerank = PageRank()
+    v = pagerank.fit_transform(M)
+    return v
 
-    M_hat = (d * M + (1 - d) / N)
-    for _ in range(num_iterations):
-        v = v @ M_hat
+def personalised_pagerank(grafo : Grafo, seeds):
+    M = matriz_adyacencia(grafo)
+    pagerank = PageRank()
+    v = pagerank.fit_transform(M, seeds)
     return v

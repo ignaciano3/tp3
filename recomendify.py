@@ -2,7 +2,7 @@
 
 import pandas as pd
 from grafo import Grafo
-from biblioteca import camino_mas_corto_bfs, pagerank, todos_en_rango, ciclo_n
+from biblioteca import camino_mas_corto_bfs, pagerank, personalised_pagerank, todos_en_rango, ciclo_n
 import numpy as np
 
 def crear_usuarios_canciones(usuarios, canciones, data):
@@ -25,24 +25,27 @@ def crear_usuarios_canciones(usuarios, canciones, data):
     
     return usuarios_canciones
 
-def crear_canciones_por_playlist(canciones, playlists, data):
+def crear_canciones_grafo(canciones, usuarios, data):
     '''
-    Tener un grafo no dirigido relacionando canciones si aparecen en una misma playlist (al menos una playlist lista a ambas canciones).
-    O (P + C)
+    Tener un grafo no dirigido relacionando canciones si aparecen en playlists de un mismo usuario 
+    (no necesariamente ambas en la misma playlist; es decir, si una canción aparece en alguna playlist del usuario X,
+    y otra canción aparece en alguna playlist del mismo usuario X, pudiendo ser la misma playlist, o no).
+    Este es el grafo a tener en cuenta para los útimos 2 comandos (rango y ciclo).
     '''
-    canciones_por_playlist = Grafo(len(canciones), canciones)
+
+    canciones_grafo = Grafo(len(canciones), canciones)
     canciones_por_index = dict(zip(canciones, range(len(canciones)))) # muy clave este
 
-    for i in playlists:
-        tabla_playlist = data[data.PLAYLIST_NAME == i]
-        tabla_playlist = tabla_playlist.TRACK_NAME + " - " + tabla_playlist.ARTIST
-        tabla_playlist = set(tabla_playlist)
-        while len(tabla_playlist) > 0:
-            cancion_1 = tabla_playlist.pop()
-            for cancion_2 in tabla_playlist:
-                canciones_por_playlist.add_edge(canciones_por_index[cancion_1], canciones_por_index[cancion_2])
+    for i in usuarios:
+        tabla_usuario = data[data.USER_ID == i]
+        tabla_usuario = tabla_usuario.TRACK_NAME + " - " + tabla_usuario.ARTIST
+        tabla_usuario = set(tabla_usuario)
+        while len(tabla_usuario) > 0:
+            cancion_1 = tabla_usuario.pop()
+            for cancion_2 in tabla_usuario:
+                canciones_grafo.add_edge(canciones_por_index[cancion_1], canciones_por_index[cancion_2])
 
-    return canciones_por_playlist
+    return canciones_grafo
 
 
 def camino_mas_corto(req, usuario_canciones_grafo, canciones_por_index):
@@ -69,10 +72,17 @@ def rango_n_canciones(req, canciones_grafo, canciones_por_index):
     todos_en_rango(canciones_grafo, cancion, n)
 
 
-def mas_importantes(n):
-    pass
+def mas_importantes(req, canciones_ordenadas, usuarios_canciones, canciones_por_index):
+    n = int(req[0])
+    for i in range (n):
+        print(usuarios_canciones.info(canciones_ordenadas[i]), end = "; ")
+    
+    print(usuarios_canciones.info(i+1))
+    
 
-def recomendacion_canciones(n):
+def recomendacion_canciones(req):
+
+
     pass
 
 def recomendacion_usuarios(n):
@@ -89,12 +99,25 @@ def main():
     canciones_por_index = dict(zip(lista_canciones, range(len(lista_canciones))))
 
     usuarios_canciones = crear_usuarios_canciones(lista_usuarios, lista_canciones, data)
-    canciones_grafo = crear_canciones_por_playlist(lista_canciones, lista_playlists, data)
+    canciones_grafo = crear_canciones_grafo(lista_canciones, lista_usuarios, data)
     
-    pagerank_dict = pagerank(usuarios_canciones)
-    x = np.where(pagerank_dict == max(pagerank_dict))
-    print(x)
-    print(usuarios_canciones.info(x[0][0]))
+    """
+    recomendacion canciones 10 
+    Love Story - Taylor Swift
+    Toxic - Britney Spears
+    I Wanna Be Yours - Arctic Monkeys
+    Hips Don't Lie (feat. Wyclef Jean) - Shakira
+    Death Of A Martian - Red Hot Chili Peppers
+    """
+
+    pagerank_list = pagerank(usuarios_canciones)
+    for i in range (100):
+        print(usuarios_canciones.info(i))
+    #pagerank_list[0:170] = 0
+
+    canciones_ordenadas = np.argsort(pagerank_list, axis=0) # indices de pagerank ascendiente
+    canciones_ordenadas = np.flip(canciones_ordenadas) # da vuelta para que quede por mas alto
+    
     
     while True:
         req = input().split()
@@ -102,7 +125,6 @@ def main():
         if not req: break
 
         if req[0] == "camino":
-            #tengo que arreglar este
             camino_mas_corto(req[1:], usuarios_canciones, canciones_por_index)
 
         elif req[0] == "recomendacion":
@@ -113,7 +135,7 @@ def main():
         
         
         elif req[0] == "mas_importantes":
-            mas_importantes(req[1:])
+            mas_importantes(req[1:], canciones_ordenadas, usuarios_canciones, canciones_por_index)
 
         elif req[0] == "ciclo":
             ciclo_n_canciones(req[1:], canciones_grafo, canciones_por_index)
