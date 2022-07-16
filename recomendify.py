@@ -151,7 +151,7 @@ def main():
         del elem[0]
         del elem[3]
         del elem[4]
-        
+    
     #data = data[["USER_ID", "TRACK_NAME", "ARTIST", "PLAYLIST_NAME"]] #unicos necesarios
 
     usuarios_unicos = list(set([v[0] for v in data]))
