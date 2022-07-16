@@ -25,3 +25,4 @@ class Grafo:
 
     def adyacentes(self, v):
         return list(self.graph[v].keys())
+
