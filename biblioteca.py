@@ -139,22 +139,18 @@ def pagerank(grafo : Grafo):
     return pagerank_list
 
 
-def pagerank_personalizado_iterar(grafo: Grafo, entrada : int, pagerank_list : list(), largo_viaje : int, empezar : bool):
+def pagerank_personalizado_iterar(grafo: Grafo, entrada : int, pagerank_list : list(), largo_viaje : int, empezar : bool, grado : float):
     if (largo_viaje == 0): return 
 
     vecinos = grafo.adyacentes(entrada)
     salida = random.choice(vecinos)
     
-    if empezar:
-        grado_entrada = 1
-    else: grado_entrada = pagerank_list[entrada]
-    
-    pagerank_list[salida] += grado_entrada/len(vecinos)
-    pagerank_personalizado_iterar(grafo, salida, pagerank_list, False, largo_viaje-1)
+    pagerank_list[salida] += grado/len(vecinos)
+    pagerank_personalizado_iterar(grafo, salida, pagerank_list, False, largo_viaje-1, grado/len(vecinos))
 
 def pagerank_personalizado(grafo: Grafo, seed: list()):
     pagerank_list = [0]* grafo.V
-    for _ in range(200):
+    for _ in range(1000):
         for s in seed:
-            pagerank_personalizado_iterar(grafo, s, pagerank_list, empezar = True, largo_viaje = grafo.V/15)
+            pagerank_personalizado_iterar(grafo, s, pagerank_list, empezar = True, largo_viaje = 10, grado = 1.)
     return pagerank_list
