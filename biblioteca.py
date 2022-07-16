@@ -1,6 +1,6 @@
 from Cola import Cola
-import numpy as np
 from grafo import Grafo
+import random
 
 # Camino mas corto
 def camino_mas_corto_bfs(grafo : Grafo, origen, destino):
@@ -115,5 +115,28 @@ def pagerank(grafo : Grafo):
     pagerank_list = [1/grafo.V]* grafo.V
     while True:
         pagerank_iterar(grafo, pagerank_list)
-        if (abs(sum(pagerank_list) - 1) <0.0001): break
+        if (abs(sum(pagerank_list) - 1) < 0.0001): break
+        # gracias a dios que no existe un #define en python
+        # y no me pueden decir de los numeros magicos
+    return pagerank_list
+
+
+def pagerank_personalizado_iterar(grafo: Grafo, entrada : int, pagerank_list : list(), largo_viaje : int, empezar : bool):
+    if (largo_viaje == 0): return 
+
+    vecinos = grafo.adyacentes(entrada)
+    salida = random.choice(vecinos)
+    
+    if empezar:
+        grado_entrada = 1
+    else: grado_entrada = pagerank_list[entrada]
+    
+    pagerank_list[salida] += grado_entrada/len(vecinos)
+    pagerank_personalizado_iterar(grafo, salida, pagerank_list, False, largo_viaje-1)
+
+def pagerank_personalizado(grafo: Grafo, seed: list()):
+    pagerank_list = [0]* grafo.V
+    for _ in range(200):
+        for s in seed:
+            pagerank_personalizado_iterar(grafo, s, pagerank_list, empezar = True, largo_viaje = grafo.V/15)
     return pagerank_list
