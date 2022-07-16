@@ -2,7 +2,7 @@
 
 import pandas as pd
 from grafo import Grafo
-from biblioteca import camino_mas_corto_bfs, pagerank, personalised_pagerank, todos_en_rango, ciclo_n
+from biblioteca import camino_mas_corto_bfs, pagerank, todos_en_rango, ciclo_n
 import numpy as np
 
 def crear_usuarios_canciones(usuarios, canciones, data):
@@ -72,12 +72,12 @@ def rango_n_canciones(req, canciones_grafo, canciones_por_index):
     todos_en_rango(canciones_grafo, cancion, n)
 
 
-def mas_importantes(req, canciones_ordenadas, usuarios_canciones, canciones_por_index):
+def mas_importantes(req, canciones_ordenadas, usuarios_canciones):
     n = int(req[0])
-    for i in range (n):
-        print(usuarios_canciones.info(canciones_ordenadas[i]), end = "; ")
+    for i in range (n-1):
+        print(usuarios_canciones.info(canciones_ordenadas[i]+169), end = "; ")
     
-    print(usuarios_canciones.info(i+1))
+    print(usuarios_canciones.info(i+1+169))
     
 
 def recomendacion_canciones(req):
@@ -109,16 +109,10 @@ def main():
     Hips Don't Lie (feat. Wyclef Jean) - Shakira
     Death Of A Martian - Red Hot Chili Peppers
     """
+    pagerank_list = pagerank(usuarios_canciones)[169:]
+    canciones_ordenadas = np.argsort(pagerank_list)
+    canciones_ordenadas = np.flip(canciones_ordenadas)
 
-    pagerank_list = pagerank(usuarios_canciones)
-    for i in range (100):
-        print(usuarios_canciones.info(i))
-    #pagerank_list[0:170] = 0
-
-    canciones_ordenadas = np.argsort(pagerank_list, axis=0) # indices de pagerank ascendiente
-    canciones_ordenadas = np.flip(canciones_ordenadas) # da vuelta para que quede por mas alto
-    
-    
     while True:
         req = input().split()
         
@@ -135,7 +129,7 @@ def main():
         
         
         elif req[0] == "mas_importantes":
-            mas_importantes(req[1:], canciones_ordenadas, usuarios_canciones, canciones_por_index)
+            mas_importantes(req[1:], canciones_ordenadas, usuarios_canciones)
 
         elif req[0] == "ciclo":
             ciclo_n_canciones(req[1:], canciones_grafo, canciones_por_index)

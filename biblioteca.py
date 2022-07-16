@@ -1,7 +1,6 @@
 from Cola import Cola
 import numpy as np
 from grafo import Grafo
-from sknetwork.ranking import PageRank
 
 # Camino mas corto
 def camino_mas_corto_bfs(grafo : Grafo, origen, destino):
@@ -106,24 +105,15 @@ def ciclo_n(grafo : Grafo, origen, n):
         if ciclo_dfs(grafo, w, origen, n-2, visitados, padres): return
     print("No se encontro recorrido")
 
-def matriz_adyacencia(grafo):
-    M = np.zeros((grafo.V, grafo.V))
-    for v in range(grafo.V):
-        for w in grafo.adyacentes(v):
-            M[w][v] = 1/len(grafo.adyacentes(v))
+def pagerank_iterar(grafo: Grafo, pagerank_list : list()):
+    d = 0.85
+    for v in range (grafo.V):
+        pagerank_vecinos = sum([pagerank_list[j] / len(grafo.adyacentes(j)) for j in grafo.adyacentes(v)])
+        pagerank_list[v] = (1-d)/grafo.V + d * pagerank_vecinos
 
-    return M
-
-def pagerank(grafo : Grafo): 
-    #esto tiene que estar bien por que es de scipy
-    # o la matriz de adyacencia esta mal o el grafo esta mal
-    M = matriz_adyacencia(grafo)
-    pagerank = PageRank()
-    v = pagerank.fit_transform(M)
-    return v
-
-def personalised_pagerank(grafo : Grafo, seeds):
-    M = matriz_adyacencia(grafo)
-    pagerank = PageRank()
-    v = pagerank.fit_transform(M, seeds)
-    return v
+def pagerank(grafo : Grafo):
+    pagerank_list = [1/grafo.V]* grafo.V
+    while True:
+        pagerank_iterar(grafo, pagerank_list)
+        if (abs(sum(pagerank_list) - 1) <0.0001): break
+    return pagerank_list
