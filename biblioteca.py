@@ -93,10 +93,12 @@ def todos_en_rango(grafo : Grafo, origen, k):
 #Ciclo n por dfs
 def reconstruir_ciclo(grafo : Grafo, v, destino, padres):
     print(grafo.info(destino), end = " --> ")
+
     while v is not destino:
         print(grafo.info(v), end = " --> ")
         v = padres[v]
-    print(grafo.info(destino))
+    
+    print(grafo.info(v))
 
 def ciclo_dfs(grafo : Grafo, v, destino, n, visitados, padres):
     if n < 0: return False
@@ -107,7 +109,7 @@ def ciclo_dfs(grafo : Grafo, v, destino, n, visitados, padres):
 
     visitados.add(v)
     for w in grafo.adyacentes(v):
-        if w not in visitados and w is not destino:
+        if w not in visitados:
             padres[w] = v
             ciclo = ciclo_dfs(grafo, w, destino, n-1, visitados, padres)
             if ciclo: return True
@@ -120,8 +122,10 @@ def ciclo_n(grafo : Grafo, origen, n):
         visitados = set()
         padres = dict()
         padres[w] = origen
+        visitados.add(origen)
         if ciclo_dfs(grafo, w, origen, n-2, visitados, padres): return
     print("No se encontro recorrido")
+
 
 def pagerank_iterar(grafo: Grafo, pagerank_list : list()):
     d = 0.85
@@ -139,18 +143,19 @@ def pagerank(grafo : Grafo):
     return pagerank_list
 
 
-def pagerank_personalizado_iterar(grafo: Grafo, entrada : int, pagerank_list : list(), largo_viaje : int, empezar : bool, grado : float):
+
+def pagerank_personalizado_iterar(grafo: Grafo, entrada : int, pagerank_list : list(), largo_viaje : int, valor: float):
     if (largo_viaje == 0): return 
 
     vecinos = grafo.adyacentes(entrada)
     salida = random.choice(vecinos)
-    
-    pagerank_list[salida] += grado/len(vecinos)
-    pagerank_personalizado_iterar(grafo, salida, pagerank_list, False, largo_viaje-1, grado/len(vecinos))
+    pagerank_list[salida] += valor/len(vecinos)
+    pagerank_personalizado_iterar(grafo, salida, pagerank_list, largo_viaje-1, valor/len(vecinos))
 
 def pagerank_personalizado(grafo: Grafo, seed: list()):
     pagerank_list = [0]* grafo.V
     for _ in range(1000):
         for s in seed:
-            pagerank_personalizado_iterar(grafo, s, pagerank_list, empezar = True, largo_viaje = 10, grado = 1.)
+            pagerank_personalizado_iterar(grafo, s, pagerank_list, largo_viaje = 5, valor = 1.)
+            pagerank_list[s] = 0
     return pagerank_list

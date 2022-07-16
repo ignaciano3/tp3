@@ -4,7 +4,6 @@ import csv
 from grafo import Grafo
 from biblioteca import camino_mas_corto_bfs, pagerank, pagerank_personalizado, todos_en_rango, ciclo_n
 import sys
-import time
 
 def crear_usuarios_canciones(usuarios, canciones, data):
     '''
@@ -38,7 +37,7 @@ def crear_canciones_grafo(canciones, usuarios, data):
     
     dict_usuarios = dict.fromkeys(usuarios)
     for key in dict_usuarios.keys():
-        dict_usuarios[key] = set() # esta porqueria q no hace bien el fromkeys asigna todas las keys a la misma lista :(
+        dict_usuarios[key] = set() # esta porqueria q no hace bien el fromkeys sino asigna todas las keys a la misma lista :(
     
     for d in data:
         cancion = d[1] + ' - ' + d[2]
@@ -55,16 +54,32 @@ def crear_canciones_grafo(canciones, usuarios, data):
     return canciones_grafo
 
 
-def camino_mas_corto(req, usuario_canciones_grafo, canciones_por_index, desfase):
+def crear_canciones_ordenadas(usuarios_canciones, desfase):
+    '''
+    Pagerank en otras palabras
+    '''
+    canciones_ordenadas = pagerank(usuarios_canciones)[desfase:] #np.argsort 
+
+    i = 0
+    for v in range(len(canciones_ordenadas)):
+        canciones_ordenadas[v] = (canciones_ordenadas[v], i)
+        i += 1
+    
+    canciones_ordenadas.sort(key = lambda x : x[0], reverse= True)
+    return canciones_ordenadas
+
+
+def camino_mas_corto(req, usuario_canciones_grafo, usuarios_canciones_index, desfase):
     canciones = " ".join(req)
     canciones = canciones.split(" >>>> ")
     try:
-        cancion_1 = canciones_por_index[canciones[0]]
-        cancion_2 = canciones_por_index[canciones[1]]
+        cancion_1 = usuarios_canciones_index[canciones[0]]
+        cancion_2 = usuarios_canciones_index[canciones[1]]
+        if (cancion_1 < desfase or cancion_2 < desfase): raise NotADirectoryError #metodos poco ortodoxos pero 100% validos
     except:
         print("Tanto el origen como el destino deben ser canciones")
         return
-    camino_mas_corto_bfs(usuario_canciones_grafo, cancion_1+169, cancion_2+169)
+    camino_mas_corto_bfs(usuario_canciones_grafo, cancion_1, cancion_2)
 
 
 def ciclo_n_canciones(req, canciones_grafo, canciones_por_index):
@@ -79,17 +94,18 @@ def rango_n_canciones(req, canciones_grafo, canciones_por_index):
     todos_en_rango(canciones_grafo, cancion, n)
 
 
-def mas_importantes(n, canciones_ordenadas, usuarios_canciones, desfase = 169):
+def mas_importantes(n, canciones_ordenadas, usuarios_canciones, desfase):
     for i in range (n-1):
         print(usuarios_canciones.info(canciones_ordenadas[i][1]+desfase), end = "; ")
     print(usuarios_canciones.info(i+1+desfase))
     
 
-def recomendacion_canciones(n, req, usuarios_canciones, usuarios_canciones_index, desfase):
+def recomendacion_canciones(n, req, usuarios_canciones, usuarios_canciones_index, desfase, canciones_ordenadas):
     canciones = " ".join(req)
     canciones = canciones.split(sep=" >>>> ")
     for i in range(len(canciones)):
         canciones[i] = usuarios_canciones_index[canciones[i]]
+
     canciones_ordenadas = pagerank_personalizado(usuarios_canciones, canciones)[desfase:]
     
     i = 0
@@ -99,7 +115,7 @@ def recomendacion_canciones(n, req, usuarios_canciones, usuarios_canciones_index
     
     canciones_ordenadas.sort(key = lambda x : x[0], reverse= True)
 
-    mas_importantes(n, canciones_ordenadas, usuarios_canciones)
+    mas_importantes(n, canciones_ordenadas, usuarios_canciones, desfase)
 
 
 def recomendacion_usuarios(n, req, usuarios_canciones, usuarios_canciones_index, desfase):
@@ -116,13 +132,11 @@ def recomendacion_usuarios(n, req, usuarios_canciones, usuarios_canciones_index,
     
     usuarios_ordenados.sort(key = lambda x : x[0], reverse= True)
 
-
     mas_importantes(n, usuarios_ordenados, usuarios_canciones, desfase=0)
 
 
-def main():
-    start = time.time()
 
+def main():
     if len(sys.argv) == 1:
         filename = 'spotify-mini.tsv'
     else:
@@ -139,55 +153,64 @@ def main():
         del elem[4]
         
     #data = data[["USER_ID", "TRACK_NAME", "ARTIST", "PLAYLIST_NAME"]] #unicos necesarios
-    
+
     usuarios_unicos = list(set([v[0] for v in data]))
     canciones_unicas = list(set([v[1] + ' - '+ v[2] for v in data]))
-
 
     canciones_grafo_index = dict(zip(canciones_unicas, range(len(canciones_unicas))))
     lista_usuarios_canciones = usuarios_unicos + canciones_unicas
     usuario_canciones_index = dict(zip(lista_usuarios_canciones, range(len(lista_usuarios_canciones))))
 
-    usuarios_canciones = crear_usuarios_canciones(usuarios_unicos, canciones_unicas, data)
-    canciones_grafo = crear_canciones_grafo(canciones_unicas, usuarios_unicos, data)
     desfase = len(usuarios_unicos)
-    canciones_ordenadas = pagerank(usuarios_canciones)[desfase:] #np.argsort
-    i = 0
-    for v in range(len(canciones_ordenadas)):
-        canciones_ordenadas[v] = (canciones_ordenadas[v], i)
-        i += 1
-    
-    canciones_ordenadas.sort(key = lambda x : x[0], reverse= True)
-    
-    end = time.time()
-    total_time = end - start
-    print("\n"+ str(total_time))
-    
-    return
+
+    canciones_grafo = None # lo hago asi para solo cargarlo cuando sea necesario y no todo al mismo tiempo
+    canciones_ordenadas = None
+    usuarios_canciones = None
+
     while True:
-        req = input().split()
+        try:
+            req = input().split()
+        except:
+            break
         
         if not req: break
-
+        
         if req[0] == "camino":
-            camino_mas_corto(req[1:], usuarios_canciones, canciones_grafo_index, desfase)
+            if usuarios_canciones == None:
+                usuarios_canciones = crear_usuarios_canciones(usuarios_unicos, canciones_unicas, data)
+            camino_mas_corto(req[1:], usuarios_canciones, usuario_canciones_index, desfase)
 
         elif req[0] == "recomendacion":
+            if usuarios_canciones == None:
+                usuarios_canciones = crear_usuarios_canciones(usuarios_unicos, canciones_unicas, data)
+            if canciones_ordenadas == None:
+                canciones_ordenadas = crear_canciones_ordenadas(usuarios_canciones, desfase)
+                
             n = int(req[2])
             if req[1] == "canciones":
-                recomendacion_canciones(n, req[3:], usuarios_canciones, usuario_canciones_index, desfase)
+                recomendacion_canciones(n, req[3:], usuarios_canciones, usuario_canciones_index, desfase, canciones_ordenadas)
             if req[1] == "usuarios":
                 recomendacion_usuarios(n, req[3:], usuarios_canciones, usuario_canciones_index, desfase)
         
         
         elif req[0] == "mas_importantes":
+            if usuarios_canciones == None:
+                usuarios_canciones = crear_usuarios_canciones(usuarios_unicos, canciones_unicas, data)
+            if canciones_ordenadas == None:
+                canciones_ordenadas = crear_canciones_ordenadas(usuarios_canciones, desfase)
             n = int(req[1])
             mas_importantes(n, canciones_ordenadas, usuarios_canciones, desfase)
 
+        
+
         elif req[0] == "ciclo":
+            if canciones_grafo == None:
+                canciones_grafo = crear_canciones_grafo(canciones_unicas, usuarios_unicos, data)
             ciclo_n_canciones(req[1:], canciones_grafo, canciones_grafo_index)
 
         elif req[0] == "rango":
+            if canciones_grafo == None:
+                canciones_grafo = crear_canciones_grafo(canciones_unicas, usuarios_unicos, data)
             rango_n_canciones(req[1:], canciones_grafo, canciones_grafo_index)
             
             
